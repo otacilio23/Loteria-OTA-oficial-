@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111111">
+<title>LOTERIAS OTA</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top, #fff5b8 0%, #d6a82c 18%, #151515 55%, #050505 100%);
+    color: #fff;
+    overflow-x: hidden;
+}
+
+.app {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    position: relative;
+}
+
+/* CABEÇALHO */
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    font-size: clamp(2rem, 7vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffd84a;
+    text-shadow:
+        0 3px 0 #8a6200,
+        0 0 20px rgba(255,216,74,.7);
+}
+
+.subtitulo {
+    margin-top: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* FIGURAS DE SORTE */
+.sorte {
+    position: fixed;
+    font-size: 45px;
+    opacity: .16;
+    pointer-events: none;
+    animation: flutuar 5s ease-in-out infinite;
+}
+
+.s1 { top: 12%; left: 3%; }
+.s2 { top: 30%; right: 3%; animation-delay: 1s; }
+.s3 { bottom: 20%; left: 5%; animation-delay: 2s; }
+.s4 { bottom: 10%; right: 5%; animation-delay: 3s; }
+.s5 { top: 8%; right: 15%; animation-delay: 1.5s; }
+
+@keyframes flutuar {
+    0%,100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-15px) rotate(8deg); }
+}
+
+/* PAINEL */
+.painel {
+    background: rgba(255,255,255,.94);
+    color: #111;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.5),
+        inset 0 0 0 3px #d8a927;
+    text-align: center;
+}
+
+.descricao {
+    font-size: .95rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* RESULTADO */
+.resultado {
+    background: linear-gradient(145deg, #ffffff, #e9e9e9);
+    border: 5px solid #111;
+    border-radius: 18px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow:
+        inset 0 0 20px rgba(0,0,0,.12),
+        0 8px 20px rgba(0,0,0,.25);
+}
+
+#milhar {
+    color: #000;
+    font-size: clamp(4.5rem, 18vw, 9rem);
+    font-weight: 900;
+    letter-spacing: 8px;
+    line-height: 1;
+    font-family: "Arial Black", Arial, sans-serif;
+}
+
+.animando {
+    opacity: .45;
+    transform: scale(1.03);
+}
+
+/* BOTÕES */
+.botoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+button {
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: .2s;
+    box-shadow: 0 5px 12px rgba(0,0,0,.25);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+button:active {
+    transform: scale(.97);
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-sortear {
+    grid-column: 1 / -1;
+    background: #111;
+    color: #ffd84a;
+    font-size: 1.3rem;
+    padding: 19px;
+    border: 2px solid #d8a927;
+}
+
+.btn-novo {
+    background: #176b35;
+    color: white;
+}
+
+.btn-copiar {
+    background: #222;
+    color: white;
+}
+
+.btn-compartilhar {
+    background: #2769b0;
+    color: white;
+}
+
+.btn-fullscreen {
+    background: #6c4bb5;
+    color: white;
+}
+
+.btn-limpar {
+    background: #b3261e;
+    color: white;
+}
+
+/* CONTADOR */
+.contador {
+    margin: 25px 0;
+    padding: 18px;
+    border-radius: 15px;
+    background: #f3f3f3;
+    border: 1px solid #ddd;
+}
+
+.contador span {
+    display: block;
+}
+
+.contador-numero {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #111;
+}
+
+/* HISTÓRICO */
+.secao {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.secao h2 {
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+}
+
+.historico {
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 12px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f4f4f4;
+    border-bottom: 1px solid #ddd;
+    color: #111;
+}
+
+.item strong {
+    font-size: 1.35rem;
+    letter-spacing: 2px;
+}
+
+.item small {
+    color: #666;
+}
+
+/* ESTATÍSTICAS */
+.estatisticas {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.stat {
+    background: #f3f3f3;
+    border-radius: 12px;
+    padding: 12px 5px;
+    text-align: center;
+    color: #111;
+}
+
+.stat strong {
+    display: block;
+    font-size: 1.2rem;
+    margin-top: 5px;
+}
+
+/* RODAPÉ */
+footer {
+    text-align: center;
+    color: white;
+    margin-top: 20px;
+    padding: 15px;
+    font-size: .85rem;
+}
+
+/* MENSAGEM */
+.mensagem {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #111;
+    color: white;
+    padding: 13px 22px;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: .3s;
+    z-index: 9999;
+}
+
+.mensagem.mostrar {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* RESPONSIVO */
+@media (max-width: 600px) {
+    .app {
+        padding: 12px;
+    }
+
+    .painel {
+        padding: 15px;
+        border-radius: 18px;
+    }
+
+    .resultado {
+        min-height: 145px;
+    }
+
+    #milhar {
+        letter-spacing: 3px;
+    }
+
+    .estatisticas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .item {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+
+    .sorte {
+        font-size: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- FIGURAS DECORATIVAS -->
+<div class="sorte s1">🍀</div>
+<div class="sorte s2">🎲</div>
+<div class="sorte s3">💰</div>
+<div class="sorte s4">⭐</div>
+<div class="sorte s5">🪙</div>
+
+<div class="app">
+
+<header>
+    <div class="logo">🍀 LOTERIAS OTA 🍀</div>
+    <div class="subtitulo">SORTEIO DE MILHAR</div>
+</header>
+
+<main class="painel">
+
+    <p class="descricao">
+        Sorteio aleatório de números de <strong>0000 a 9999</strong>
+    </p>
+
+    <div class="resultado">
+        <div id="milhar">0000</div>
+    </div>
+
+    <div class="botoes">
+
+        <button
+            id="btnSortear"
+            class="btn-sortear"
+            onclick="sortearMilhar()">
+            🎲 SORTEAR MILHAR
+        </button>
+
+        <button
+            class="btn-novo"
+            onclick="sortearMilhar()">
+            🔄 NOVO SORTEIO
+        </button>
+
+        <button
+            class="btn-copiar"
+            onclick="copiarResultado()">
+            📋 COPIAR
+        </button>
+
+        <button
+            class="btn-compartilhar"
+            onclick="compartilharResultado()">
+            📤 COMPARTILHAR
+        </button>
+
+        <button
+            class="btn-fullscreen"
+            onclick="alternarTelaCheia()">
+            ⛶ TELA CHEIA
+        </button>
+
+    </div>
+
+    <!-- CONTADOR -->
+    <div class="contador">
+        <span>SORTEIOS REALIZADOS</span>
+        <span id="contador" class="contador-numero">0</span>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <section class="secao">
+
+        <h2>📜 HISTÓRICO DOS SORTEIOS</h2>
+
+        <div id="historico" class="historico">
+            <div class="item">
+                <span>Nenhum sorteio realizado.</span>
+            </div>
+        </div>
+
+        <br>
+
+        <button
+            class="btn-limpar"
+            style="width:100%;"
+            onclick="limparHistorico()">
+            🗑️ LIMPAR HISTÓRICO
+        </button>
+
+    </section>
+
+    <!-- ESTATÍSTICAS -->
+    <section class="secao">
+
+        <h2>📊 ESTATÍSTICAS</h2>
+
+        <div class="estatisticas">
+
+            <div class="stat">
+                Total
+                <strong id="statTotal">0</strong>
+            </div>
+
+            <div class="stat">
+                Última
+                <strong id="statUltima">0000</strong>
+            </div>
+
+            <div class="stat">
+                Maior
+                <strong id="statMaior">0000</strong>
+            </div>
+
+            <div class="stat">
+                Menor
+                <strong id="statMenor">0000</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <strong>LOTERIAS OTA</strong><br>
+    Sorteio numérico aleatório de 0000 a 9999.<br><br>
+    Aplicativo demonstrativo para entretenimento.
+</footer>
+
+</div>
+
+<div id="mensagem" class="mensagem"></div>
+
+<script>
+
+const CHAVE_HISTORICO = "loteriasOTA_historico";
+
+let historico = [];
+let resultadoAtual = "0000";
+let sorteando = false;
+
+
+/* ==========================================
+   GERAR NÚMERO ALEATÓRIO
+========================================== */
+
+function gerarNumeroSeguro() {
+
+    const array = new Uint32Array(1);
+
+    crypto.getRandomValues(array);
+
+    return array[0] % 10000;
+}
+
+
+/* ==========================================
+   FORMATAR MILHAR
+========================================== */
+
+function formatarMilhar(numero) {
+
+    return String(numero).padStart(4, "0");
+
+}
+
+
+/* ==========================================
+   SORTEAR MILHAR
+========================================== */
+
+function sortearMilhar() {
+
+    if (sorteando) return;
+
+    sorteando = true;
+
+    const botao = document.getElementById("btnSortear");
+
+    botao.disabled = true;
+
+    const elemento = document.getElementById("milhar");
+
+    elemento.classList.add("animando");
+
+    let contadorAnimacao = 0;
+
+    const intervalo = setInterval(() => {
+
+        const numero = gerarNumeroSeguro();
+
+        elemento.textContent = formatarMilhar(numero);
+
+        contadorAnimacao++;
+
+        if (contadorAnimacao >= 18) {
+
+            clearInterval(intervalo);
+
+            finalizarSorteio();
+
+        }
+
+    }, 80);
+
+}
+
+
+/* ==========================================
+   FINALIZAR SORTEIO
+========================================== */
+
+function finalizarSorteio() {
+
+    const numero = gerarNumeroSeguro();
+
+    resultadoAtual = formatarMilhar(numero);
+
+    const elemento = document.getElementById("milhar");
+
+    elemento.textContent = resultadoAtual;
+
+    elemento.classList.remove("animando");
+
+    const agora = new Date();
+
+    const registro = {
+
+        numero: resultadoAtual,
+
+        data: agora.toLocaleDateString("pt-BR"),
+
+        horario: agora.toLocaleTimeString("pt-BR")
+
+    };
+
+    historico.unshift(registro);
+
+    salvarHistorico();
+
+    renderizarHistorico();
+
+    atualizarEstatisticas();
+
+    mostrarMensagem("🎉 Milhar sorteada: " + resultadoAtual);
+
+    document.getElementById("btnSortear").disabled = false;
+
+    sorteando = false;
+
+}
+
+
+/* ==========================================
+   SALVAR HISTÓRICO
+========================================== */
+
+function salvarHistorico() {
+
+    localStorage.setItem(
+        CHAVE_HISTORICO,
+        JSON.stringify(historico)
+    );
+
+}
+
+
+/* ==========================================
+   CARREGAR HISTÓRICO
+========================================== */
+
+function carregarHistorico() {
+
+    try {
+
+        const dados = localStorage.getItem(CHAVE_HISTORICO);
+
+        if (dados) {
+
+            historico = JSON.parse(dados);
+
+        }
+
+    } catch (erro) {
+
+        historico = [];
+
+    }
+
+    renderizarHistorico();
+
+    atualizarEstatisticas();
+
+}
+
+
+/* ==========================================
+   RENDERIZAR HISTÓRICO
+========================================== */
+
+function renderizarHistorico() {
+
+    const container = document.getElementById("historico");
+
+    container.innerHTML = "";
+
+    if (historico.length === 0) {
+
+        container.innerHTML = `
+            <div class="item">
+                <span>Nenhum sorteio realizado.</span>
+            </div>
+        `;
+
+        return;
+
+    }
+
+    historico.forEach((registro, index) => {
+
+        const item = document.createElement("div");
+
+        item.className = "item";
+
+        item.innerHTML = `
+            <span>
+                <strong>${registro.numero}</strong>
+            </span>
+
+            <small>
+                ${String(index + 1).padStart(2, "0")}
+                — ${registro.data}
+                — ${registro.horario}
+            </small>
+        `;
+
+        container.appendChild(item);
+
+    });
+
+}
+
+
+/* ==========================================
+   ESTATÍSTICAS
+========================================== */
+
+function atualizarEstatisticas() {
+
+    const total = historico.length;
+
+    document.getElementById("contador").textContent = total;
+
+    document.getElementById("statTotal").textContent = total;
+
+    if (total === 0) {
+
+        document.getElementById("statUltima").textContent = "0000";
+        document.getElementById("statMaior").textContent = "0000";
+        document.getElementById("statMenor").textContent = "0000";
+
+        return;
+
+    }
+
+    const numeros = historico.map(
+        item => Number(item.numero)
+    );
+
+    document.getElementById("statUltima").textContent =
+        historico[0].numero;
+
+    document.getElementById("statMaior").textContent =
+        formatarMilhar(Math.max(...numeros));
+
+    document.getElementById("statMenor").textContent =
+        formatarMilhar(Math.min(...numeros));
+
+}
+
+
+/* ==========================================
+   COPIAR RESULTADO
+========================================== */
+
+async function copiarResultado() {
+
+    try {
+
+        await navigator.clipboard.writeText(resultadoAtual);
+
+        mostrarMensagem("📋 Milhar copiada!");
+
+    } catch (erro) {
+
+        mostrarMensagem("Não foi possível copiar.");
+
+    }
+
+}
+
+
+/* ==========================================
+   COMPARTILHAR
+========================================== */
+
+async function compartilharResultado() {
+
+    const texto =
+`🍀 LOTERIAS OTA 🍀
+
+Milhar sorteada: ${resultadoAtual}
+
+Sorteio aleatório de 0000 a 9999.`;
+
+    if (navigator.share) {
+
+        try {
+
+            await navigator.share({
+                title: "LOTERIAS OTA",
+                text: texto
+            });
+
+        } catch (erro) {
+
+            // Usuário cancelou o compartilhamento.
+
+        }
+
+    } else {
+
+        try {
+
+            await navigator.clipboard.writeText(texto);
+
+            mostrarMensagem(
+                "📤 Resultado copiado para compartilhar!"
+            );
+
+        } catch (erro) {
+
+            mostrarMensagem(
+                "Não foi possível compartilhar."
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ==========================================
+   LIMPAR HISTÓRICO
+========================================== */
+
+function limparHistorico() {
+
+    if (historico.length === 0) {
+
+        mostrarMensagem("O histórico já está vazio.");
+
+        return;
+
+    }
+
+    const confirmar = confirm(
+        "Deseja realmente apagar todo o histórico?"
+    );
+
+    if (!confirmar) return;
+
+    historico = [];
+
+    localStorage.removeItem(CHAVE_HISTORICO);
+
+    resultadoAtual = "0000";
+
+    document.getElementById("milhar").textContent = "0000";
+
+    renderizarHistorico();
+
+    atualizarEstatisticas();
+
+    mostrarMensagem("🗑️ Histórico apagado!");
+
+}
+
+
+/* ==========================================
+   TELA CHEIA
+========================================== */
+
+async function alternarTelaCheia() {
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            await document.documentElement.requestFullscreen();
+
+            document.querySelector(".btn-fullscreen").textContent =
+                "✕ SAIR DA TELA CHEIA";
+
+        } else {
+
+            await document.exitFullscreen();
+
+            document.querySelector(".btn-fullscreen").textContent =
+                "⛶ TELA CHEIA";
+
+        }
+
+    } catch (erro) {
+
+        mostrarMensagem("Tela cheia não disponível.");
+
+    }
+
+}
+
+
+/* ==========================================
+   MENSAGEM
+========================================== */
+
+let timerMensagem;
+
+function mostrarMensagem(texto) {
+
+    const mensagem = document.getElementById("mensagem");
+
+    mensagem.textContent = texto;
+
+    mensagem.classList.add("mostrar");
+
+    clearTimeout(timerMensagem);
+
+    timerMensagem = setTimeout(() => {
+
+        mensagem.classList.remove("mostrar");
+
+    }, 2500);
+
+}
+
+
+/* ==========================================
+   DETECTAR ALTERAÇÃO DA TELA CHEIA
+========================================== */
+
+document.addEventListener(
+    "fullscreenchange",
+    () => {
+
+        const botao =
+            document.querySelector(".btn-fullscreen");
+
+        if (document.fullscreenElement) {
+
+            botao.textContent = "✕ SAIR DA TELA CHEIA";
+
+        } else {
+
+            botao.textContent = "⛶ TELA CHEIA";
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+   INICIALIZAÇÃO
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        carregarHistorico();
+
+    }
+);
+
+</script>
+
+</body>
+</html>
